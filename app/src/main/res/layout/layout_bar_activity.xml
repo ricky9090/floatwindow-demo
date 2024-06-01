@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_vertical"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/add_window_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:background="@color/teal_700"
+        android:padding="10dp"
+        android:textColor="@color/white"
+        android:elevation="4dp"
+        android:text="添加浮窗" />
+
+    <TextView
+        android:id="@+id/remove_window_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp"
+        android:background="@color/teal_700"
+        android:padding="10dp"
+        android:textColor="@color/white"
+        android:elevation="4dp"
+        android:text="移除浮窗" />
+
+</LinearLayout>
