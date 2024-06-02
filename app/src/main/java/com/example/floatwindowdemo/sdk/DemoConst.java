@@ -11,5 +11,15 @@ public class DemoConst {
     public static final int ACTION_ADD_WINDOW = 1000;
     public static final int ACTION_REMOVE_WINDOW = 1001;
 
-    public static final String KEY_PARAMS_WINDOW_CLASS = "key_window_class";
+    public interface Key {
+        String WINDOW_CLASS = "key_window_class";
+        String CLIENT_INFO = "key_client_info";
+    }
+
+    public interface Callback {
+        String ERROR_MSG = "key_error_msg";
+        int ERROR = 500;
+    }
+
+
 }

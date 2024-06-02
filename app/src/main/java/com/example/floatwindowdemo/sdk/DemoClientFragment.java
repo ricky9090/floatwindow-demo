@@ -24,30 +24,12 @@ import java.lang.ref.WeakReference;
 
 public class DemoClientFragment extends Fragment {
 
-    static class ClientHandler extends Handler {
-
-        WeakReference<DemoClient> clientRef;
-
-        public ClientHandler(@NonNull Looper looper, DemoClient client) {
-            super(looper);
-            this.clientRef = new WeakReference<>(client);
-        }
-
-        @Override
-        public void handleMessage(@NonNull Message msg) {
-            if (msg.what == DemoConst.ACTION_CONNECT_ESTABLISHED) {
-                Log.d(DemoConst.TAG, "server ===> client msg");
-                Log.d(DemoConst.TAG, "双向通讯建立");
-            }
-        }
-    }
-
     public static final String TAG = "[DemoClientFragment] ";
 
     private Messenger serverMessenger = null;
-    protected DemoClient client = new DemoClient(this);
+    protected final DemoClient client = new DemoClient(this);
 
-    private ClientHandler clientHandler;
+    private DemoClientHandler clientHandler;
     private Messenger clientMessenger;
 
     private final ServiceConnection demoServiceConnection = new ServiceConnection() {
@@ -55,10 +37,13 @@ public class DemoClientFragment extends Fragment {
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             serverMessenger = new Messenger(iBinder);
 
-            Log.d(DemoConst.TAG, TAG + "连接悬浮窗服务");
+            DemoClientHelper.doLog(client, TAG + "连接悬浮窗服务");
             try {
+                Bundle connectedInfo = new Bundle();
+                connectedInfo.putSerializable(DemoConst.Key.CLIENT_INFO, client.clientInfo);
                 Message connectMsg = Message.obtain();
                 connectMsg.what = DemoConst.ACTION_CONNECT;
+                connectMsg.setData(connectedInfo);
                 connectMsg.replyTo = clientMessenger;
                 serverMessenger.send(connectMsg);
             } catch (RemoteException e) {
@@ -68,7 +53,7 @@ public class DemoClientFragment extends Fragment {
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
-            Log.d(DemoConst.TAG, TAG + "悬浮窗服务异常关闭");
+            DemoClientHelper.doLog(client, TAG + "悬浮窗服务异常关闭");
             serverMessenger = null;
         }
     };
@@ -77,7 +62,7 @@ public class DemoClientFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        clientHandler = new ClientHandler(Looper.getMainLooper(), client);
+        clientHandler = new DemoClientHandler(Looper.getMainLooper(), client);
         clientMessenger = new Messenger(clientHandler);
     }
 
@@ -93,9 +78,9 @@ public class DemoClientFragment extends Fragment {
 
         Context context = getContext();
         if (context != null) {
-            Log.d(DemoConst.TAG, TAG + "启动悬浮窗服务");
+            DemoClientHelper.doLog(client, TAG + "启动悬浮窗服务");
             DemoService.start(getContext());
-            Log.d(DemoConst.TAG, TAG + "绑定悬浮窗服务");
+            DemoClientHelper.doLog(client, TAG + "绑定悬浮窗服务");
             Intent serverIntent = new Intent();
             serverIntent.setClass(getContext(), DemoService.class);
             context.bindService(
@@ -119,7 +104,7 @@ public class DemoClientFragment extends Fragment {
         super.onStop();
         Context context = getContext();
         if (context != null) {
-            Log.d(DemoConst.TAG, TAG + "解绑悬浮窗服务");
+            DemoClientHelper.doLog(client, TAG + "解绑悬浮窗服务");
             context.unbindService(demoServiceConnection);
         }
     }
@@ -139,6 +124,7 @@ public class DemoClientFragment extends Fragment {
             Message message = Message.obtain();
             message.what = msg;
             message.setData(params);
+            message.replyTo = clientMessenger;
             try {
                 serverMessenger.send(message);
             } catch (RemoteException e) {

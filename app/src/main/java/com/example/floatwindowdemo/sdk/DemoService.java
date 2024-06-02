@@ -16,51 +16,11 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import java.lang.ref.WeakReference;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DemoService extends Service {
-
-    private static class ServerHandler extends Handler {
-
-        WeakReference<DemoService> serverRef;
-
-        public ServerHandler(@NonNull Looper looper, DemoService service) {
-            super(looper);
-            serverRef = new WeakReference<>(service);
-        }
-
-        @Override
-        public void handleMessage(@NonNull Message msg) {
-            Log.d(DemoConst.TAG, "服务端接受信息: " + msg.what);
-            DemoService demoService = serverRef.get();
-            if (demoService == null) {
-                return;
-            }
-            if (msg.what == DemoConst.ACTION_CONNECT) {
-                Messenger clientMessenger = msg.replyTo;
-                if (clientMessenger != null) {
-                    try {
-                        Log.d(DemoConst.TAG, "server <=== client msg");
-                        demoService.setClientMessenger(clientMessenger);
-                        Message connectionMsg = Message.obtain();
-                        connectionMsg.what = DemoConst.ACTION_CONNECT_ESTABLISHED;
-                        clientMessenger.send(connectionMsg);
-                    } catch (RemoteException e) {
-                        e.printStackTrace();
-                    }
-                }
-                return;
-            }
-            if (msg.what == DemoConst.ACTION_ADD_WINDOW) {
-                Bundle params = msg.getData();
-                Class windowClass = (Class) params.getSerializable(DemoConst.KEY_PARAMS_WINDOW_CLASS);
-                Log.d(DemoConst.TAG, "ACTION_ADD_WINDOW");
-                demoService.addFloatWindow(windowClass);
-            } else if (msg.what == DemoConst.ACTION_REMOVE_WINDOW) {
-                Log.d(DemoConst.TAG, "ACTION_REMOVE_WINDOW");
-                demoService.removeFloatWindow();
-            }
-        }
-    }
 
     private static final String TAG = "Service-0531";
 
@@ -69,6 +29,8 @@ public class DemoService extends Service {
     private DemoFloatWindowManager demoFloatWindowManager;
 
     private Messenger clientMessenger;
+
+    private final Map<DemoClientInfo, Messenger> clientMap = new HashMap<>();
 
     public static void start(Context context) {
         if (context != null) {
@@ -84,7 +46,7 @@ public class DemoService extends Service {
         Log.d(DemoConst.TAG, "onCreate, pid: " + Process.myPid() + ", thread: " + Thread.currentThread().getName());
 
         demoFloatWindowManager = new DemoFloatWindowManager(getApplicationContext());
-        serverHandler = new ServerHandler(Looper.getMainLooper(), this);
+        serverHandler = new DemoServiceHandler(Looper.getMainLooper(), this);
 
         serverMessenger = new Messenger(serverHandler);
     }
@@ -135,6 +97,22 @@ public class DemoService extends Service {
         removeFloatWindow();
     }
 
+    Messenger checkClient(Bundle params) throws Exception {
+        if (params == null) {
+            throw new Exception("No params from client");
+        }
+        Object clientInfoObj = params.getSerializable(DemoConst.Key.CLIENT_INFO);
+        if (clientInfoObj instanceof DemoClientInfo) {
+            DemoClientInfo clientInfo = (DemoClientInfo) clientInfoObj;
+            if (!clientMap.containsKey(clientInfo)) {
+                throw new Exception("Not register client");
+            }
+            return clientMap.get(clientInfo);
+        }
+        throw new Exception("No client info");
+
+    }
+
     void addFloatWindow(Class windowClass) {
         if (demoFloatWindowManager != null) {
             demoFloatWindowManager.addFloatWindow(windowClass);
@@ -147,11 +125,7 @@ public class DemoService extends Service {
         }
     }
 
-    public Messenger getClientMessenger() {
-        return clientMessenger;
-    }
-
-    public void setClientMessenger(Messenger clientMessenger) {
-        this.clientMessenger = clientMessenger;
+    public void registerClient(DemoClientInfo clientInfo, Messenger clientMessenger) {
+        this.clientMap.put(clientInfo, clientMessenger);
     }
 }

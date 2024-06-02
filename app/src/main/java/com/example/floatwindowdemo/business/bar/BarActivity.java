@@ -42,22 +42,28 @@ public class BarActivity extends AppCompatActivity {
 
         String a = savedInstanceState == null ? "null" : "not null";
         Log.d(DemoConst.TAG, "savedInstanceState: " + a);
-        client = DemoClientHelper.bind(this);
-        client.setClientCallback(new DemoClient.ClientCallback() {
-            @Override
-            public void onReceive(String message) {
+        client = DemoClientHelper.bind(this, DemoClientHelper.ClientParams
+                .create("bar", "BarActivity")
+                .callback(new DemoClient.ClientCallback() {
+                    @Override
+                    public void onConnected(String message) {
 
-            }
-        });
+                    }
+
+                    @Override
+                    public void onReceive(String message) {
+
+                    }
+                }));
     }
 
     private void doAddWindow() {
         Bundle params = new Bundle();
-        params.putSerializable(DemoConst.KEY_PARAMS_WINDOW_CLASS, BarFloatWindow.class);
-        client.sendMessage(DemoConst.ACTION_ADD_WINDOW, params);
+        params.putSerializable(DemoConst.Key.WINDOW_CLASS, BarFloatWindow.class);
+        client.openFloatWindow(params);
     }
 
     private void doRemoveWindow() {
-        client.sendMessage(DemoConst.ACTION_REMOVE_WINDOW, null);
+        client.closeFloatWindow();
     }
 }
