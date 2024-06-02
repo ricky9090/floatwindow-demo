@@ -38,17 +38,9 @@ public class DemoClientFragment extends Fragment {
             serverMessenger = new Messenger(iBinder);
 
             DemoClientHelper.doLog(client, TAG + "连接悬浮窗服务");
-            try {
-                Bundle connectedInfo = new Bundle();
-                connectedInfo.putSerializable(DemoConst.Key.CLIENT_INFO, client.clientInfo);
-                Message connectMsg = Message.obtain();
-                connectMsg.what = DemoConst.ACTION_CONNECT;
-                connectMsg.setData(connectedInfo);
-                connectMsg.replyTo = clientMessenger;
-                serverMessenger.send(connectMsg);
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
+            Bundle connectedInfo = new Bundle();
+            connectedInfo.putSerializable(DemoConst.Key.CLIENT_INFO, client.clientInfo);
+            sendMessage(DemoConst.ACTION_CONNECT, connectedInfo);
         }
 
         @Override
@@ -119,10 +111,10 @@ public class DemoClientFragment extends Fragment {
         super.onDestroy();
     }
 
-    public void sendMessage(int msg, Bundle params) {
+    public void sendMessage(int msgWhat, Bundle params) {
         if (serverMessenger != null) {
             Message message = Message.obtain();
-            message.what = msg;
+            message.what = msgWhat;
             message.setData(params);
             message.replyTo = clientMessenger;
             try {
