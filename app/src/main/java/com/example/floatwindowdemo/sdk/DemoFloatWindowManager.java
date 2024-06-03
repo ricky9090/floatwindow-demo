@@ -27,8 +27,8 @@ public class DemoFloatWindowManager {
         if (windowManager == null) {
             return;
         }
-        if (mCurrentWindow != null) {
-            return;
+        if (mCurrentWindow != null && mCurrentWindow.mWindowView != null) {
+            windowManager.removeView(mCurrentWindow.mWindowView);
         }
 
         params = new WindowManager.LayoutParams();

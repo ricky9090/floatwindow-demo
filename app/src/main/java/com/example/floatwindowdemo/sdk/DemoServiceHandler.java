@@ -1,5 +1,6 @@
 package com.example.floatwindowdemo.sdk;
 
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -30,7 +31,9 @@ public class DemoServiceHandler extends Handler {
         }
         if (msg.what == DemoConst.ACTION_CONNECT) {
             handleConnect(msg, demoService);
-        } else if (msg.what == DemoConst.ACTION_ADD_WINDOW) {
+        } else if (msg.what == DemoConst.ACTION_DISCONNECT) {
+
+        } else if (msg.what == DemoConst.ACTION_ADD_WINDOW || msg.what == DemoConst.ACTION_AUTO_PLAY) {
             handleAddWindow(msg, demoService);
         } else if (msg.what == DemoConst.ACTION_REMOVE_WINDOW) {
             handleRemoveWindow(msg, demoService);
@@ -54,6 +57,15 @@ public class DemoServiceHandler extends Handler {
         }
     }
 
+    private void handleDisconnect(@NonNull Message msg, @NonNull DemoService demoService) {
+        Log.d(DemoConst.TAG, "ACTION_DISCONNECT");
+        try {
+            demoService.disconnectClient(msg.getData());
+        } catch (Exception e) {
+
+        }
+    }
+
     private void handleAddWindow(@NonNull Message msg, @NonNull DemoService demoService) {
         Log.d(DemoConst.TAG, "ACTION_ADD_WINDOW");
         Messenger clientMessenger = doCheckClient(msg, demoService);
@@ -64,7 +76,8 @@ public class DemoServiceHandler extends Handler {
         // 客户端校验通过，继续执行
         try {
             Bundle params = msg.getData();
-            Class windowClass = (Class) params.getSerializable(DemoConst.Key.WINDOW_CLASS);
+            DemoOpenParams openParams = (DemoOpenParams) params.getSerializable(DemoConst.Key.OPEN_PARAMS);
+            Class windowClass = openParams.windowClass;
             demoService.addFloatWindow(windowClass);
         } catch (Exception e) {
             e.printStackTrace();

@@ -1,5 +1,6 @@
 package com.example.floatwindowdemo.sdk;
 
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.text.TextUtils;
 
@@ -29,9 +30,11 @@ public class DemoClient {
         clientCallback = clientParams.callback;
     }
 
-    public void openFloatWindow(Bundle params) {
-        params.putSerializable(DemoConst.Key.CLIENT_INFO, clientFragment.client.clientInfo);
-        clientFragment.sendMessage(DemoConst.ACTION_ADD_WINDOW, params);
+    public void openFloatWindow(DemoOpenParams params) {
+        Bundle bundle = new Bundle();
+        bundle.putSerializable(DemoConst.Key.CLIENT_INFO, clientFragment.client.clientInfo);
+        bundle.putSerializable(DemoConst.Key.OPEN_PARAMS, params);
+        clientFragment.sendMessage(DemoConst.ACTION_ADD_WINDOW, bundle);
     }
 
     public void closeFloatWindow() {
@@ -50,5 +53,7 @@ public class DemoClient {
 
         void onConnected(String message);
         void onReceive(String message);
+
+        DemoOpenParams onGetAutoOpenParams();
     }
 }

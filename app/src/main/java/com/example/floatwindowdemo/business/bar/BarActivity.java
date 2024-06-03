@@ -10,6 +10,7 @@ import com.example.floatwindowdemo.sdk.DemoClient;
 import com.example.floatwindowdemo.sdk.DemoClientHelper;
 import com.example.floatwindowdemo.sdk.DemoConst;
 import com.example.floatwindowdemo.R;
+import com.example.floatwindowdemo.sdk.DemoOpenParams;
 
 /**
  * 业务页面2 独立进程
@@ -54,13 +55,23 @@ public class BarActivity extends AppCompatActivity {
                     public void onReceive(String message) {
 
                     }
+
+                    @Override
+                    public DemoOpenParams onGetAutoOpenParams() {
+                        DemoOpenParams openParams = new DemoOpenParams();
+                        openParams.name = "auto open: " + System.currentTimeMillis();
+                        openParams.windowClass = BarFloatWindow.class;
+
+                        return openParams;
+                    }
                 }));
     }
 
     private void doAddWindow() {
-        Bundle params = new Bundle();
-        params.putSerializable(DemoConst.Key.WINDOW_CLASS, BarFloatWindow.class);
-        client.openFloatWindow(params);
+        DemoOpenParams openParams = new DemoOpenParams();
+        openParams.name = "click open: " + System.currentTimeMillis();
+        openParams.windowClass = BarFloatWindow.class;
+        client.openFloatWindow(openParams);
     }
 
     private void doRemoveWindow() {

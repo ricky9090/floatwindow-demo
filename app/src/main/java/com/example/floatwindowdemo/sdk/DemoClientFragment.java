@@ -96,7 +96,22 @@ public class DemoClientFragment extends Fragment {
         super.onStop();
         Context context = getContext();
         if (context != null) {
+            DemoOpenParams autoOpenParams = null;
+            if (client.clientCallback != null) {
+                autoOpenParams = client.clientCallback.onGetAutoOpenParams();
+            }
+            if (autoOpenParams != null) {
+                Bundle bundle = new Bundle();
+                bundle.putSerializable(DemoConst.Key.CLIENT_INFO, client.clientInfo);
+                bundle.putSerializable(DemoConst.Key.OPEN_PARAMS, autoOpenParams);
+                sendMessage(DemoConst.ACTION_AUTO_PLAY, bundle);
+            }
             DemoClientHelper.doLog(client, TAG + "解绑悬浮窗服务");
+
+            Bundle bundle = new Bundle();
+            bundle.putSerializable(DemoConst.Key.CLIENT_INFO, client.clientInfo);
+            sendMessage(DemoConst.ACTION_DISCONNECT, bundle);
+
             context.unbindService(demoServiceConnection);
         }
     }

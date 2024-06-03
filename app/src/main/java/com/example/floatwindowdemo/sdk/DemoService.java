@@ -73,13 +73,13 @@ public class DemoService extends Service {
         boolean autoStop = true;
         if (demoFloatWindowManager.mCurrentWindow == null && autoStop) {
             Log.d(DemoConst.TAG, "onUnbind 当前没有任何浮窗");
-            serverHandler.post(new Runnable() {
+            serverHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    Log.d(DemoConst.TAG, "自动关闭悬浮窗服务");
+                    Log.d(DemoConst.TAG, "5s自动关闭悬浮窗服务");
                     stopSelf();
                 }
-            });
+            }, 5000);
         }
         return true;
     }
@@ -111,6 +111,22 @@ public class DemoService extends Service {
         }
         throw new Exception("No client info");
 
+    }
+
+    void disconnectClient(Bundle params) throws Exception {
+        if (params == null) {
+            throw new Exception("No params from client");
+        }
+        Object clientInfoObj = params.getSerializable(DemoConst.Key.CLIENT_INFO);
+        if (clientInfoObj instanceof DemoClientInfo) {
+            DemoClientInfo clientInfo = (DemoClientInfo) clientInfoObj;
+            if (clientMap.containsKey(clientInfo)) {
+                clientMap.put(clientInfo, null);
+                Log.d(DemoConst.TAG, "disconnect client");
+                return;
+            }
+        }
+        throw new Exception("No client info");
     }
 
     void addFloatWindow(Class windowClass) {

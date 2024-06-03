@@ -7,11 +7,13 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 
+import com.example.floatwindowdemo.business.bar.BarFloatWindow;
 import com.example.floatwindowdemo.sdk.DemoClient;
 import com.example.floatwindowdemo.sdk.DemoClientHelper;
 import com.example.floatwindowdemo.sdk.DemoClientInfo;
 import com.example.floatwindowdemo.sdk.DemoConst;
 import com.example.floatwindowdemo.R;
+import com.example.floatwindowdemo.sdk.DemoOpenParams;
 
 /**
  * 业务页面1 主进程
@@ -65,13 +67,23 @@ public class FooActivity extends AppCompatActivity {
                         logView.append(message);
                         logView.append("\n");
                     }
+
+                    @Override
+                    public DemoOpenParams onGetAutoOpenParams() {
+                        DemoOpenParams openParams = new DemoOpenParams();
+                        openParams.name = "auto open: " + System.currentTimeMillis();
+                        openParams.windowClass = FooFloatWindow.class;
+
+                        return openParams;
+                    }
                 }));
     }
 
     private void doAddWindow() {
-        Bundle params = new Bundle();
-        params.putSerializable(DemoConst.Key.WINDOW_CLASS, FooFloatWindow.class);
-        client.openFloatWindow(params);
+        DemoOpenParams openParams = new DemoOpenParams();
+        openParams.name = "click open: " + System.currentTimeMillis();
+        openParams.windowClass = FooFloatWindow.class;
+        client.openFloatWindow(openParams);
     }
 
     private void doRemoveWindow() {
