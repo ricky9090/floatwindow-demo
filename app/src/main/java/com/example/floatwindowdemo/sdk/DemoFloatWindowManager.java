@@ -13,7 +13,10 @@ public class DemoFloatWindowManager {
 
     private final Context context;
     private final WindowManager windowManager;
+
+    ClientRecord mCurrentClient;
     BaseFloatWindow mCurrentWindow;
+
     private WindowManager.LayoutParams params;
 
     public DemoFloatWindowManager(Context context) {
@@ -23,12 +26,19 @@ public class DemoFloatWindowManager {
     }
 
     @SuppressLint("SetTextI18n")
-    public void addFloatWindow(Class windowClass) {
+    public void addFloatWindow(ClientRecord clientRecord, Class windowClass) throws Exception {
         if (windowManager == null) {
             return;
         }
-        if (mCurrentWindow != null && mCurrentWindow.mWindowView != null) {
-            windowManager.removeView(mCurrentWindow.mWindowView);
+        if (mCurrentWindow != null && mCurrentClient.clientInfo.equals(clientRecord.clientInfo)) {
+            throw new Exception("Duplicate request");
+        }
+
+        try {
+            // 先移除旧的，内部捕获异常
+            removeFloatWindow();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         params = new WindowManager.LayoutParams();
@@ -50,6 +60,7 @@ public class DemoFloatWindowManager {
         try {
             mCurrentWindow = (BaseFloatWindow) windowClass.newInstance();
             mCurrentWindow.createWindow(context);
+            mCurrentClient = clientRecord;
 
             View windowView = mCurrentWindow.mWindowView;
             if (windowView != null) {
@@ -64,11 +75,14 @@ public class DemoFloatWindowManager {
     }
 
     // 移除悬浮窗
-    public void removeFloatWindow() {
+    public void removeFloatWindow() throws Exception {
         if (mCurrentWindow != null && mCurrentWindow.mWindowView != null) {
             windowManager.removeView(mCurrentWindow.mWindowView);
             mCurrentWindow.destroyWindow();
             mCurrentWindow = null;
+            mCurrentClient = null;
+        } else {
+            throw new Exception("No displaying window");
         }
     }
 }

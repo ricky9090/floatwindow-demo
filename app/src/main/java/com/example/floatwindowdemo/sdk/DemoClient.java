@@ -2,6 +2,7 @@ package com.example.floatwindowdemo.sdk;
 
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -43,16 +44,17 @@ public class DemoClient {
         clientFragment.sendMessage(DemoConst.ACTION_REMOVE_WINDOW, params);
     }
 
-    void onReceiveMessage(String msg) {
-        if (clientCallback != null && !TextUtils.isEmpty(msg)) {
-            clientCallback.onReceive(msg);
+    void onReceiveMessage(@NonNull DemoResult result) {
+        if (clientCallback != null) {
+            clientCallback.onResult(result);
         }
     }
 
     public interface ClientCallback {
 
         void onConnected(String message);
-        void onReceive(String message);
+        void onLog(String log);
+        void onResult(DemoResult result);
 
         DemoOpenParams onGetAutoOpenParams();
     }

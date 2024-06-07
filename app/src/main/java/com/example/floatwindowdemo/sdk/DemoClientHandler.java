@@ -5,7 +5,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.support.annotation.NonNull;
-import android.text.TextUtils;
 
 import java.lang.ref.WeakReference;
 
@@ -24,18 +23,31 @@ public class DemoClientHandler extends Handler {
         if (client == null) {
             return;
         }
-        if (msg.what == DemoConst.ACTION_CONNECT_ESTABLISHED) {
-            DemoClientHelper.doLog(client, "server ===> client msg");
-            DemoClientHelper.doLog(client, "双向通讯建立");
-        } else if (msg.what == DemoConst.Callback.ERROR) {
-            Bundle errorData = msg.getData();
-            if (errorData == null) {
-                return;
-            }
-            String errorMsg = errorData.getString(DemoConst.Callback.ERROR_MSG);
-            if (!TextUtils.isEmpty(errorMsg)) {
-                DemoClientHelper.doLog(client, errorMsg);
-            }
+        if (msg.what == DemoConst.ACTION_SERVICE_REPLY) {
+            handleServiceReply(msg, client);
+
+        }
+    }
+
+    private void handleServiceReply(@NonNull Message msg, @NonNull DemoClient client) {
+        Bundle dataWrapper = msg.getData();
+        if (dataWrapper == null) {
+            return;
+        }
+
+        try {
+            int status = dataWrapper.getInt(DemoConst.ServiceReplyKey.KEY_STATUS);
+            String message = dataWrapper.getString(DemoConst.ServiceReplyKey.KEY_MESSAGE);
+            Bundle data = dataWrapper.getBundle(DemoConst.ServiceReplyKey.KEY_DATA);
+
+            DemoResult result = new DemoResult();
+            result.status = status;
+            result.message = message;
+            result.data = data;
+
+            client.onReceiveMessage(result);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

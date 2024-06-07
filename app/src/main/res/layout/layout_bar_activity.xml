@@ -1,31 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:gravity="center_vertical"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/add_window_btn"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/bar_btn_container"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:background="@color/teal_700"
-        android:padding="10dp"
-        android:textColor="@color/white"
-        android:elevation="4dp"
-        android:text="添加浮窗" />
+        android:orientation="vertical"
+        app:layout_constraintBottom_toTopOf="@+id/bar_log_view"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
-    <TextView
-        android:id="@+id/remove_window_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="20dp"
-        android:background="@color/teal_700"
-        android:padding="10dp"
-        android:textColor="@color/white"
-        android:elevation="4dp"
-        android:text="移除浮窗" />
+        <TextView
+            android:id="@+id/add_window_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@color/teal_700"
+            android:elevation="4dp"
+            android:padding="10dp"
+            android:text="添加浮窗"
+            android:textColor="@color/white" />
 
-</LinearLayout>
+        <TextView
+            android:id="@+id/remove_window_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="20dp"
+            android:background="@color/teal_700"
+            android:elevation="4dp"
+            android:padding="10dp"
+            android:text="移除浮窗"
+            android:textColor="@color/white" />
+    </LinearLayout>
+
+    <android.support.v7.widget.AppCompatEditText
+        android:id="@+id/bar_log_view"
+        android:layout_width="0dp"
+        android:layout_height="200dp"
+        android:maxLines="200"
+        android:cursorVisible="false"
+        android:editable="false"
+        android:gravity="top"
+        android:hint="log"
+        android:inputType="none"
+        android:padding="4dp"
+        android:textIsSelectable="false"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
+
+</android.support.constraint.ConstraintLayout>

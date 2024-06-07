@@ -37,7 +37,8 @@ public class DemoClientFragment extends Fragment {
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             serverMessenger = new Messenger(iBinder);
 
-            DemoClientHelper.doLog(client, TAG + "连接悬浮窗服务");
+            DemoClientHelper.doLog(client, "server ===> client msg");
+
             Bundle connectedInfo = new Bundle();
             connectedInfo.putSerializable(DemoConst.Key.CLIENT_INFO, client.clientInfo);
             sendMessage(DemoConst.ACTION_CONNECT, connectedInfo);

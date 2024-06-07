@@ -20,6 +20,19 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+
+class ClientRecord {
+    static final int STATUS_CONNECTED = 1;
+    static final int STATUS_DISCONNECTED = 2;
+
+    Messenger clientMessenger;
+    int status = STATUS_CONNECTED;
+    DemoClientInfo clientInfo;
+
+    public ClientRecord() {
+    }
+}
+
 public class DemoService extends Service {
 
     private static final String TAG = "Service-0531";
@@ -30,7 +43,7 @@ public class DemoService extends Service {
 
     private Messenger clientMessenger;
 
-    private final Map<DemoClientInfo, Messenger> clientMap = new HashMap<>();
+    private final Map<DemoClientInfo, ClientRecord> clientMap = new HashMap<>();
 
     public static void start(Context context) {
         if (context != null) {
@@ -94,13 +107,16 @@ public class DemoService extends Service {
     public void onDestroy() {
         Log.d(DemoConst.TAG, "onDestroy, pid: " + Process.myPid() + ", thread: " + Thread.currentThread().getName());
         super.onDestroy();
-        removeFloatWindow();
+        try {
+            removeFloatWindow();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    Messenger checkClient(Bundle params) throws Exception {
-        if (params == null) {
-            throw new Exception("No params from client");
-        }
+    ClientRecord checkClient(Bundle params) throws Exception {
+        DemoAssertHelper.assertNotNull(params, DemoConst.ErrorMsg.INVALID_PARAMS);
+
         Object clientInfoObj = params.getSerializable(DemoConst.Key.CLIENT_INFO);
         if (clientInfoObj instanceof DemoClientInfo) {
             DemoClientInfo clientInfo = (DemoClientInfo) clientInfoObj;
@@ -114,14 +130,15 @@ public class DemoService extends Service {
     }
 
     void disconnectClient(Bundle params) throws Exception {
-        if (params == null) {
-            throw new Exception("No params from client");
-        }
+        DemoAssertHelper.assertNotNull(params, DemoConst.ErrorMsg.INVALID_PARAMS);
+
         Object clientInfoObj = params.getSerializable(DemoConst.Key.CLIENT_INFO);
         if (clientInfoObj instanceof DemoClientInfo) {
             DemoClientInfo clientInfo = (DemoClientInfo) clientInfoObj;
             if (clientMap.containsKey(clientInfo)) {
-                clientMap.put(clientInfo, null);
+                ClientRecord record = clientMap.get(clientInfo);
+                record.status = ClientRecord.STATUS_DISCONNECTED;
+                record.clientMessenger = null;
                 Log.d(DemoConst.TAG, "disconnect client");
                 return;
             }
@@ -129,19 +146,23 @@ public class DemoService extends Service {
         throw new Exception("No client info");
     }
 
-    void addFloatWindow(Class windowClass) {
+    void addFloatWindow(ClientRecord clientRecord, Class windowClass) throws Exception {
         if (demoFloatWindowManager != null) {
-            demoFloatWindowManager.addFloatWindow(windowClass);
+            demoFloatWindowManager.addFloatWindow(clientRecord, windowClass);
         }
     }
 
-    void removeFloatWindow() {
+    void removeFloatWindow() throws Exception {
         if (demoFloatWindowManager != null) {
             demoFloatWindowManager.removeFloatWindow();
         }
     }
 
     public void registerClient(DemoClientInfo clientInfo, Messenger clientMessenger) {
-        this.clientMap.put(clientInfo, clientMessenger);
+        ClientRecord record = new ClientRecord();
+        record.clientMessenger = clientMessenger;
+        record.clientInfo = clientInfo;
+
+        this.clientMap.put(clientInfo, record);
     }
 }

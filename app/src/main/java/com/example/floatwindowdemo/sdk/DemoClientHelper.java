@@ -55,7 +55,7 @@ public class DemoClientHelper {
     static void doLog(DemoClient client, String log) {
         Log.d(DemoConst.TAG, log);
         if (client.clientCallback != null) {
-            client.clientCallback.onReceive(log);
+            client.clientCallback.onLog(log);
         }
     }
 }

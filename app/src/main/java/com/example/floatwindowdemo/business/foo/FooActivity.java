@@ -14,6 +14,7 @@ import com.example.floatwindowdemo.sdk.DemoClientInfo;
 import com.example.floatwindowdemo.sdk.DemoConst;
 import com.example.floatwindowdemo.R;
 import com.example.floatwindowdemo.sdk.DemoOpenParams;
+import com.example.floatwindowdemo.sdk.DemoResult;
 
 /**
  * 业务页面1 主进程
@@ -63,9 +64,18 @@ public class FooActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onReceive(String message) {
-                        logView.append(message);
+                    public void onLog(String log) {
                         logView.append("\n");
+                        logView.append(log);
+                    }
+
+                    @Override
+                    public void onResult(DemoResult result) {
+                        if (result != null) {
+                            String log ="STATUS[" +  result.status + "]: " + result.message;
+                            logView.append("\n");
+                            logView.append(log);
+                        }
                     }
 
                     @Override
